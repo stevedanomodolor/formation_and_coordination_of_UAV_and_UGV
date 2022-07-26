@@ -5,6 +5,12 @@ Master's thesis project by Stevedan Ogochukwu Omodolor on coordination and flock
 TFRT-6181. https://lup.lub.lu.se/
 student-papers/
 
+
+
+https://user-images.githubusercontent.com/61468301/181077374-91b47d78-ce3b-45ab-b9c0-1f65e3a61d51.mp4
+
+
+
 ## General Info
 This repository contains the two projects, each of which includes it own README detailing how it was implemented:
 
