@@ -1,0 +1,58 @@
+%% test and ensure models works 
+
+
+clear 
+close all 
+% load the models
+agv_models = load(pwd + "/models/drone/second_order_model_drone.mat");
+ugv_models = load(pwd + "/models/ugv/ugv_model.mat");
+
+
+dt = 0.01;
+ugv.vx = ugv_models.d_sysx;
+ugv.vy = ugv_models.d_sysy;
+agv.vx =  agv_models.d_sysx;
+agv.vy =  agv_models.d_sysy;
+noise.vx = agv_models.std_errorx;
+noise.vy = agv_models.std_errory;
+clear agv_models ugv_models
+%%
+
+sx = sx.(x_sys);
+sy = sy.(y_sys);
+clear x_sys y_sys std_x std_y
+% inital position
+q0 = [0;0];
+p0 = [0;0];
+a0 = [0;0];
+
+N = size(p0,1);
+Ts = sx.Ts;
+% create the drone objects 
+drone1 = droneSecondOrderModel(q0, p0,a0, N, sx, sy, 1, false, true, 0.02, 0.02);
+drone1.display_state
+
+t = 0:drone1.sx.Ts:5; % simulation time horizon
+s = size(t,2);
+% constant input 
+u = ones(2,s) * 30;
+
+
+start simulation
+outputs = [];
+for i = 1:s
+   drone1.update_state(u(:,i));
+   o = drone1.get_state;
+   outputs = [outputs;o.p(1) o.p(2) o.q(1) o.q(2)];
+end 
+
+
+figure 
+subplot(2,2,1)
+plot(t,outputs(:,1))
+subplot(2,2,2)
+plot(t,outputs(:,2))
+subplot(2,2,3)
+plot(t,outputs(:,3))
+subplot(2,2,4)
+plot(t,outputs(:,4))

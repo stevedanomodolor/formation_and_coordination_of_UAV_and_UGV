@@ -1,0 +1,3 @@
+#Gneral comments observed during experiments
+- It is diffult to tune especially in real life, because every time you modify a gain, the experiment has to be performed again. Even a good simulation model could not take into consideration
+the effect of random jumps from the positioning system. This observation might be wrong

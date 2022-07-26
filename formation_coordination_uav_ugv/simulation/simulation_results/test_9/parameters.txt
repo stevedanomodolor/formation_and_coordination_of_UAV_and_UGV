@@ -1,0 +1,253 @@
+%% Test 9 obstacle avoidance, issue is that it is locally stable but not globally stable 
+
+clear all
+close all
+
+%% General parameters
+dt = 0.01; % integration time
+n_ugv = 0;
+n_agv  = 4;
+three_formation = 4;
+n_robots = n_agv + n_ugv;
+agv_size = 0.15;
+ugv_size = 0.32;
+N = 2; % working in 2d plane
+file_path = '~/masters_thesis_stevedan/masters-thesis/code/control/simulation/simulation_results/test_9/';
+file_name = 'test_9';
+
+%% configuration robot model
+% load the models
+agv_models = load(pwd + "/models/drone/second_order_model.mat");
+ugv_models = load(pwd + "/models/ugv/ugv_model.mat");
+ugv.vx = ugv_models.d_sysx;
+ugv.vy = ugv_models.d_sysy;
+agv.vx =  agv_models.d_sysx;
+agv.vy =  agv_models.d_sysy;
+noise.vx = 0.001;%agv_models.std_errorx;
+noise.vy = 0.001;%agv_models.std_errory;
+clear agv_models ugv_models
+
+%% load simulation environment
+free_space = 1;
+split_rejoin = 2;
+obs_pos = [];
+E1 = EnironmentSetupSimulation(split_rejoin, obs_pos);
+obs_pos = E1.obstacle_matrix;
+[fig_live_plot, ax_live_plot] = E1.showEnvironment;
+
+%% Initialize data logger
+
+n_data = 9;
+robot_naming = {'drone1','drone2','drone3','drone4','drone5'};
+data_logger = logger(file_path, file_name, n_robots,n_data,robot_naming);
+q_log = zeros(N,n_robots);
+p_log = zeros(N,n_robots);
+a_log = zeros(N,n_robots);
+inp_log = zeros(N,n_robots);
+inpf_log = zeros(N,n_robots);
+inpo_log = zeros(N,n_robots);
+inpn_log = zeros(N,n_robots);
+inpori_log = zeros(N,n_robots);
+inpint_log = zeros(N,n_robots);
+
+
+%% Controller setup
+controller_gains.c1_alpha = 0.2; 
+controller_gains.c2_alpha = 1; % c2 gain are recmoputed
+controller_gains.c1_beta = 2;
+controller_gains.c2_beta = 1;
+controller_gains.c1_gamma = 0.1;
+controller_gains.c2_gamma = 0.25;
+controller_gains.c1_theta = 0.2;
+controller_gains.c1_delta = 0.09;
+controller_gains.c2_delta = 0.0;
+controller_gains.c3_delta = 0.00;
+% Formation parameters
+form_param.dist = 0.5;
+form_param.type = three_formation;
+form_param.k = 7;
+form_param.ratio = 0.8; % ratio between dist inter and obstacle
+form_param.eps = 0.1;
+form_param.a = 5;
+form_param.b = 5;
+form_param.h_alpha = 0.2;
+form_param.h_beta = 0.9;
+form_param.d_obs = 0;
+form_param.nav_type = 1; %
+form_param.integrator = 2;
+form_param.dt = 0.01;
+form_param.int_max  =0.1;
+
+controller_agv = SwamControllerAlg.empty(n_agv,0);
+for i = 1:n_agv
+    controller_agv(i) = SwamControllerAlg(agv_size, "d" + num2str(i),i,form_param,controller_gains);
+end
+
+%% Robot states
+q_agv = [-1.3 -1.1 -1.3 -1.80 -1.8 ;
+    1 0 -1 -1 1];
+% q_agv =  [1.7559    1.7559    1.3404    1.3597;
+%     0.1549   -0.2746   -0.3040    0.2027];
+p_agv = [0 0 0 0 0;
+    0 0 0 0 0 ];
+a_agv = [0 0 0 0 0;
+    0 0 0 0 0];
+% 
+% % square formation 
+% % triangular formation 
+% q_agv = q_agv(:,form_param.type);
+% a_agv = a_agv(:,form_param.type);
+% p_agv = p_agv(:,form_param.type);
+% 
+% % triangular formation 
+q_agv = q_agv(:,1:form_param.type);
+a_agv = a_agv(:,1:form_param.type);
+p_agv = p_agv(:,1:form_param.type);
+
+% % square formation 
+q_agv = [-1.3 -1.3 -1.80 -1.8 ;
+    1 -1 -1 1];
+
+
+
+%% Create model object
+swam_agv = droneSecondOrderModel.empty(n_agv,0);
+for i = 1:n_agv
+    swam_agv(i) = droneSecondOrderModel(q_agv(:,i), p_agv(:,i),a_agv(:,i), N, agv, i, true, true, noise.vx, noise.vy);
+end
+
+
+%% simulation
+
+buffer_size = 100;
+wp.buffer = ones(1,buffer_size);
+wp.previous = 0;
+desired_orientation = [];
+
+wp.pose = E1.ref_waypoints;
+wp.ind = 1;
+wp.size = size(wp.pose,2);
+ref.q =  wp.pose(:,1);
+ref.p = [0.01;0];
+t = 0;
+stop_test = false;
+% Log intial data
+% log data
+data_logger.logData(t,ref.q,ref.p,q_agv,p_agv,a_log,inp_log,inpf_log,...
+    inpo_log,inpn_log,inpori_log,inpint_log);
+r = rateControl(10);
+counter = 0;
+
+while ~stop_test
+    % each drone
+    for i = 1:n_agv
+
+
+        % update input
+        [input, input_vec,q_obs ] = controller_agv(i).controller(q_agv,p_agv,ref,obs_pos,desired_orientation);
+        % update_state
+        swam_agv(i).update_state(input);
+        output = swam_agv(i).get_state;
+        q_cur = [output.q(1);output.q(2)];
+        p_cur = [output.p(1);output.p(2)];
+        a_cur = [output.a(1);output.a(2)];
+
+        % prepare log
+        q_log(:,i) = q_cur;
+        p_log(:,i) = p_cur;
+        a_log(:,i) = a_cur;
+        inp_log(:,i) = input;
+        inpf_log(:,i) = input_vec(:,1);
+        inpo_log(:,i) = input_vec(:,2);
+        inpn_log(:,i) = input_vec(:,3);
+        inpori_log(:,i) = input_vec(:,4);
+        inpint_log(:,i) = input_vec(:,5);
+%         if i == 1
+% % 
+%         hold(ax_live_plot,"on")
+%         plot(q_obs(1,:),q_obs(2,:), "*","MarkerSize",12)
+% 
+%         end
+
+    end
+    % update state
+    q_agv = q_log;
+    p_agv = p_log;
+    a_agv = a_log;
+
+
+    % Switch waypoint
+    % agv is the leader
+    centroid = [mean(q_agv(1,:)); mean(q_agv(2,:))];
+%     norm(centroid-ref.q) 
+    if (-centroid+ref.q) < 0.1
+        if wp.ind == wp.size
+            counter = counter + dt;
+            error =  (norm(centroid -ref.q));
+            wp.buffer = [wp.buffer(2:end), error];
+%             mean(wp.buffer)
+            if counter > 0 % wait for seconds more mean(wp.buffer) < 0.1
+                % stop all agv
+                for r = 1:n_agv
+                    swam_agv(r).stop_robot;
+                end
+%                 stop_test = true;
+            end
+            if counter > 5
+                stop_test = true;
+            end
+        else
+            wp.ind = wp.ind+1;
+            ref.q =  wp.pose(:,wp.ind);
+
+
+        end
+    end
+
+
+
+    t = t+dt;
+
+
+    % log data
+    data_logger.logData(t,ref.q,ref.p,q_log,p_log,a_log,inp_log,inpf_log,...
+        inpo_log,inpn_log,inpori_log, inpint_log);
+    %live plot
+    E1.plotLive(ax_live_plot,q_log);
+   
+    waitfor(r);
+
+
+
+
+
+
+
+end
+
+
+
+
+
+%%
+%Save the lod data
+data_logger.saveData
+
+file_ =[file_path file_name];
+[fig, ax] = E1.showEnvironment;
+%%
+visualize_results(file_,ax,n_robots,n_data,robot_naming);
+legend(ax)
+%%
+FolderName = file_path;   % Your destination folder
+FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
+for iFig = 1:length(FigList)
+  FigHandle = FigList(iFig);
+  FigName   = num2str(get(FigHandle, 'Number'));
+  set(0, 'CurrentFigure', FigHandle);
+  savefig(fullfile(FolderName, [FigName '.fig']));
+end
+
+
+
+

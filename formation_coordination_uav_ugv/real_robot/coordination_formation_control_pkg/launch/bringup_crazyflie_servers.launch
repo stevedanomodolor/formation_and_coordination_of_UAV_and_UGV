@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- load crazyflie parameters -->
+  <rosparam command="load" file="$(find coordination_formation_control_pkg)/config/crazyflieTypes.yaml" />
+  <rosparam command="load" file="$(find coordination_formation_control_pkg)/config/crazyfliesConfig.yaml" />
+
+
+  <node pkg="crazyswarm" type="crazyswarm_server" name="crazyswarm_server" output="screen" >
+    <rosparam>
+      # Logging configuration (Use enable_logging to actually enable logging)
+      genericLogTopics: ["position", "velocity","acceleration"]
+      genericLogTopicFrequencies: [50,50,50]
+      genericLogTopic_position_Variables: ["stateEstimateZ.x", "stateEstimateZ.y","stateEstimateZ.z", "stateEstimate.yaw"]
+      genericLogTopic_velocity_Variables: ["stateEstimateZ.vx", "stateEstimateZ.vy","stateEstimateZ.vz"]
+      genericLogTopic_acceleration_Variables: ["stateEstimateZ.ax", "stateEstimateZ.ay","stateEstimateZ.az"]
+      # firmware parameters for all drones (use crazyflieTypes.yaml to set per type, or
+      # allCrazyflies.yaml to set per drone)
+      firmwareParams:
+        commander:
+          enHighLevel: 1
+        stabilizer:
+          estimator: 2 # 1: complementary, 2: kalman
+          controller: 1 # 1: PID, 2: mellinger
+        ring:
+          effect: 16 # 6: double spinner, 7: solid color, 16: packetRate
+          solidBlue: 255 # if set to solid color
+          solidGreen: 0 # if set to solid color
+          solidRed: 0 # if set to solid color
+          headlightEnable: 0
+        locSrv:
+          extPosStdDev: 1e-3
+          extQuatStdDev: 0.5e-1
+        kalman:
+          resetEstimation: 1
+      # tracking
+      motion_capture_type: "none" # one of none,vicon,optitrack,optitrack_closed_source,qualisys,vrpn
+      object_tracking_type: "none" # one of motionCapture,libobjecttracker
+      send_position_only: False # set to False to send position+orientation; set to True to send position only
+      motion_capture_host_name: "vicon"
+      # motion_capture_interface_ip: "" # optional for optitrack with multiple interfaces
+      save_point_clouds: "/dev/null" # set to a valid path to log mocap point cloud binary file.
+      print_latency: False
+      write_csvs: False
+      force_no_cache: False
+      enable_parameters: True
+      enable_logging: True
+      enable_logging_pose: True
+    </rosparam>
+  </node>
+
+  <!-- execute rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find coordination_formation_control_pkg)/config/test.rviz"/>
+
+
+
+
+
+
+</launch>

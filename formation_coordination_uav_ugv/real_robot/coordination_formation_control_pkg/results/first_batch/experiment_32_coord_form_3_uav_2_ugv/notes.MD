@@ -1,0 +1,77 @@
+# Goal
+- Maintain the current centroid
+- X: 1.7
+- Y: 0
+- Vx: 0.001
+- Vy: 0
+- Orientation 0
+
+Experiment premises
+Flockinr g and cooridnation with 2 ugv We reduced the distance alot to see the following in action
+
+0.5 for the omniwheels, 0.8 for the clusters
+
+#comments
+This happends when the distance t the cluster is to near
+lots of socialations
+# Uav
+uav_c1_alpha: 0.20
+uav_c2_alpha: 0.3 # this is recomputed
+uav_c1_beta: 0.3
+uav_c2_beta: 0.1 # this is recomputed
+uav_c1_gamma: 0.2
+uav_c2_gamma: 0.2
+uav_c1_theta: 0.1
+uav_c1_delta: 0.07
+
+# uav_c1_alpha: 0.035
+# uav_c2_alpha: 0.04 # this is recomputed
+# uav_c1_beta: 0.04
+# uav_c2_beta: 0.02 # this is recomputed
+# uav_c1_gamma: 0.02
+# uav_c2_gamma: 0.03
+# uav_c1_theta: 0.3
+# uav_c1_delta: 0.01
+
+uav_d: 0.8
+uav_formation_t: 3 #/* type must be minimum 2, 3: tuangle formation, 4 suare, 5 pentagon*/
+uav_k: 7
+uav_ratio:  0.8 # /* ratio between dist inter and obstacle*/
+uav_eps: 0.1
+uav_a: 5
+uav_b: 5
+uav_h_alpha: 0.2
+uav_h_beta: 0.9
+uav_d_obs: 0
+uav_nav_type:  1 #/* convergence approach -1, parallel approach 2*/
+uav_integrator: 2 #/* single/ double integrator*/
+uav_dt:  0.01 #/* sample time*/
+uav_int_max:  0.1 #/* maximum integral*/
+
+# ugv
+
+# Uav
+ugv_c1_alpha: 0.6
+ugv_c2_alpha: 1 # this is recomputed
+ugv_c1_beta: 0.35
+ugv_c2_beta: 1 # this is recomputed
+ugv_c1_gamma: 0.25
+ugv_c2_gamma: 0.2
+ugv_c1_theta: 0.0
+ugv_c1_delta: 0.00
+
+
+ugv_d: 0.3
+ugv_formation_t: 2 #/* type must be minimum 2, 3: tuangle formation, 4 suare, 5 pentagon*/
+ugv_k: 7
+ugv_ratio:  0.8 # /* ratio between dist inter and obstacle*/
+ugv_eps: 0.1
+ugv_a: 5
+ugv_b: 5
+ugv_h_alpha: 0.2
+ugv_h_beta: 0.9
+ugv_d_obs: 0
+ugv_nav_type:  1 #/* convergence approach -1, parallel approach 2*/
+ugv_integrator: 1 #/* single/ double integrator*/
+ugv_dt:  0.02 #/* sample time*/
+ugv_int_max:  0.1 #/* maximum integral*/

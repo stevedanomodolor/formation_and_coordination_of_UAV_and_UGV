@@ -1,0 +1,15 @@
+n_drones: 3
+n_ugvs: 0
+hz_freq: 50 # controller frquency
+include_obstacle: false
+include_orientation: false
+n_obs: 0
+log_name: "/home/spot/steven_master_ws/src/coordination_formation_control_pkg/results/experiment_1/experiment_1_trianglular_no_formation"
+enable_log: true
+
+# waypoint
+# x: 0
+# y: 0
+# orienation: 0
+# vx: 0
+# vy: 0

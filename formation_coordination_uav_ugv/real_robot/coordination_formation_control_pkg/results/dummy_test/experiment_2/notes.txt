@@ -1,0 +1,5 @@
+Test conditions
+No orienation
+No obstacle
+Only 3 drones
+mantain position at [0,0]

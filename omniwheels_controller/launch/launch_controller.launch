@@ -1,0 +1,8 @@
+<launch>
+	<rosparam command="load" file="$(find omniwheels_controller)/config/omniwheels_config.yaml"/>
+	<group ns = "omniwheel1">	
+		<node name="omniwheel_controller" pkg="omniwheels_controller" type="omni_wheel_controller_node.py" output="screen"/>
+		<node name="crazyflie_logger" pkg="omniwheels_controller" type="crazyflie_logger_node.py" output="screen"/>
+
+	</group>
+</launch>

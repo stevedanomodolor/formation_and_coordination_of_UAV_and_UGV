@@ -1,0 +1,17 @@
+crazyflies:
+  - id: 4
+    channel: 80
+    initialPosition: [0.0, 0.0, 0.0]
+    type: default
+  - id: 2
+    channel: 80
+    initialPosition: [0.0, 0.0, 0.0]
+    type: default
+  - id: 3
+    channel: 80
+    initialPosition: [0.0, 0.0, 0.0]
+    type: default
+  - id: 1
+    channel: 80
+    initialPosition: [0.0, 0.0, 0.0]
+    type: default

@@ -1,0 +1,4 @@
+bool stop_demo
+bool init_formation
+bool initialize_robot
+bool start_orientation

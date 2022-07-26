@@ -1,0 +1,17 @@
+# configuration file for all the omniwheels 
+name: "omniwheel1"
+id: 1
+channel: 90 # change to the correct one
+type: default
+position_offset: 0.11 # ofsset from crazyflie module to the cenyter of the omniwheels
+R: 0.16
+r: 0.0007 #this does not match the real wheelradius
+kp_x: 0.1
+kp_y: 0.1
+kp_z: 0.1
+ki_x: 0.01
+ki_y: 0.01
+ki_z: 0.01
+rate_hz: 50 # rate of the control loop
+
+
